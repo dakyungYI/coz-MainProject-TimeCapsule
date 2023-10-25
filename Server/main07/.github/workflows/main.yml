@@ -17,14 +17,13 @@ jobs:
           java-version: '11'
           distribution: 'zulu'
       - name: Grant execute permission for gradlew
-        run:  |
-          cd ./Server/main07
-          chmod +x gradlew
+        run: chmod +x Server/main07/gradlew
       - name: Build with Gradle
+        working-directory: Server/main07
         run: ./gradlew build
       - name: Docker build
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
-          docker build -t spring-cicd . 
-          docker tag spring-cicd dakyung/spring-cicd:${GITHUB_SHA::7}
-          docker push dakyung/spring-cicd:${GITHUB_SHA::7}
+          docker build -t timecapsule-cicd -f Server/main07/Dockerfile . 
+          docker tag timecapsule-cicd dakyung/timecapsule-cicd:${GITHUB_SHA::7}
+          docker push dakyung/timecapsule-cicd:${GITHUB_SHA::7}
