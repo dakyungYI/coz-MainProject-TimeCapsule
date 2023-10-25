@@ -20,7 +20,7 @@ jobs:
         run: chmod +x Server/main07/gradlew
       - name: Build with Gradle
         working-directory: Server/main07
-        run: ./gradlew build
+        run: ./gradlew clean build
       - name: Docker build
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
