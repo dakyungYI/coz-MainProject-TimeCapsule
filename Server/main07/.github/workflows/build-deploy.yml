@@ -1,0 +1,64 @@
+name: Build and Deploy Spring Boot to AWS EC2
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  PROJECT_NAME: timecapsule
+  BUCKET_NAME: timecapsule-cicd-bucket
+  CODE_DEPLOY_APP_NAME: timecapsule-cicd
+  DEPLOYMENT_GROUP_NAME: timecapsule-instance
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+
+      - name: Permission for gradlew
+        run: chmod +x Server/main07/gradlew
+        shell: bash
+
+      - name: Build with Gradle
+        working-directory: Server/main07
+        run: ./gradlew clean build
+
+      - name: Docker build
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker build -t timecapsule-cicd -f Server/main07/Dockerfile . 
+          docker tag timecapsule-cicd dakyung/timecapsule-cicd:${GITHUB_SHA::7}
+          docker push dakyung/timecapsule-cicd:${GITHUB_SHA::7}
+
+      - name: Build and Test
+        run: ./gradlew build test
+
+      - name: Make Zip File
+        run: zip -qq -r ./$GITHUB_SHA.zip .
+        shell: bash
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
+
+      - name: Code Deploy To EC2 instance
+        run: aws deploy create-deployment
+          --application-name $CODE_DEPLOY_APP_NAME
+          --deployment-config-name CodeDeployDefault.AllAtOnce
+          --deployment-group-name $DEPLOYMENT_GROUP_NAME
+          --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
