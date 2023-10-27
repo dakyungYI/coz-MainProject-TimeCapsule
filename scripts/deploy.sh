@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-REPOSITORY=/home/ubuntu/Server/main07
+REPOSITORY=/home/ubuntu/coz-MainProject-TimeCapsule
 cd $REPOSITORY
 
-APP_NAME=timecapsule
+APP_NAME=coz-MainProject-TimeCapsule
 JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep 'SNAPSHOT.jar' | tail -n 1)
 JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 

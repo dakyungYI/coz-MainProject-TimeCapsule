@@ -3,9 +3,9 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ubuntu/Server/main07
+    destination: /home/ubuntu/coz-MainProject-TimeCapsule
 permissions:
-  - object: /home/ubuntu/Server/main07/
+  - object: /home/ubuntu/coz-MainProject-TimeCapsule
     owner: ubuntu
     group: ubuntu
 hooks:
