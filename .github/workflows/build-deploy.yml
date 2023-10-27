@@ -40,6 +40,7 @@ jobs:
           docker push dakyung/timecapsule-cicd:${GITHUB_SHA::7}
 
       - name: Build and Test
+        working-directory: Server/main07
         run: ./gradlew build test
 
       - name: Make Zip File
